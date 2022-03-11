@@ -4,6 +4,8 @@ import statistics
 
 
 def process_line(line):
+    # Обработка входящщих строк
+
     line = line.strip()
     data = re.split('\s+', line)
     date = data[0].split(sep=".")
@@ -11,7 +13,8 @@ def process_line(line):
 
     ## (weekday, hours, minutes, traffic_value)
     clean_data = (
-        datetime.datetime(year=int(date[2]), month=int(date[1]), day=int(date[0])).weekday(), int(time[0]), int(time[1]),
+        datetime.datetime(year=int(date[2]), month=int(date[1]), day=int(date[0])).weekday(), int(time[0]),
+        int(time[1]),
         float(data[5]))
 
     return clean_data
@@ -21,6 +24,8 @@ WINDOW_SIZE = 4
 
 
 def get_history_weighted_mean(history, day, hours, minutes):
+    # Вычисляет среднее взвешенное историческое значение
+    # Здесь можно было бы использовать datetime, но я не успел, поэтому так :)
     day_hour_history = history[(day, hours)]
 
     if hours == 0:
@@ -40,6 +45,7 @@ def get_history_weighted_mean(history, day, hours, minutes):
 
 
 def compute_new_metric(history, current_data, line):
+    # Определяет является ли новое значение повышенным или пониженным
     processed_line = process_line(line)
     current_data.append(processed_line)
     if len(current_data) >= WINDOW_SIZE:
@@ -53,12 +59,13 @@ def compute_new_metric(history, current_data, line):
         if mean_current_value > mean_history_value * 1.3:
             print("Трафик выше нормы")
         elif mean_current_value < mean_history_value * 0.9:
-           print("Tрафик ниже нормы")
+            print("Tрафик ниже нормы")
         else:
             print("Tрафик в норме")
 
 
 def main():
+    # Читайм и заполняем исторические данные
     history = {}
     with open("history.txt") as f:
         for line in f.readlines():
@@ -67,6 +74,7 @@ def main():
 
     current_data = list(tuple())
 
+    # Обрабатываем ввод
     line = input('Enter "File" for run example or enter "Data" for add new data:')
     if line == "Exit":
         exit()
@@ -79,7 +87,7 @@ def main():
             line = input('Enter new data:')
             if line == "Exit":
                 exit()
-
+            
             compute_new_metric(history, current_data, line)
 
 
